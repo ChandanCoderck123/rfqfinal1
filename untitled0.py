@@ -8,7 +8,6 @@ Original file is located at
 """
 
 # Uninstall newer OpenAI and install version 0.28.0 to ensure old Embedding calls still work
-pip uninstall -y openai
 pip install openai==0.28.0
 pip install faiss-cpu numpy pandas flask
 
