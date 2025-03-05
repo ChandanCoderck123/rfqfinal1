@@ -10,9 +10,11 @@ def use_grok_api(query):
     Returns:
     - dict: The response JSON from the API.
     """
-    api_url = "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"  # Replace with actual Grok API URL
+    api_url = "https://api.grok.com/query"  # Replace with actual Grok API URL
+    api_key = "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"  # Replace with your actual API key
+
     headers = {
-        "Authorization": "Bearer YOUR_API_KEY",  # Replace with actual API Key
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
     payload = {
@@ -27,5 +29,5 @@ def use_grok_api(query):
         return {"error": str(e)}
 
 # Example usage:
-response = use_grok_api("What is the latest news in AI?")
+response = use_grok_api("What is the latest in AI?")
 print(response)
