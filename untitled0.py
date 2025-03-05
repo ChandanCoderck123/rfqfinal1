@@ -103,4 +103,4 @@ def rfq_search():
     return jsonify(matched_products), 200
 
 # To run in Google Colab, uncomment the following line.
-# app.run(host='0.0.0.0', port=5000, debug=True)
+ app.run(host='0.0.0.0', port=5000, debug=True)
