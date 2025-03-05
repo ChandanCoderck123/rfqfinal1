@@ -27,7 +27,7 @@ def clean_text(text):
     return re.sub(r'[^\x00-\x7F]+', '', text).strip()
 
 # Load catalog master
-catalog_df = pd.read_csv("/content/SKU list of 23-24 - Sheet1.csv")
+catalog_df = pd.read_csv("./SKU list of 23-24 - Sheet1.csv")
 
 # Select only required columns
 catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
