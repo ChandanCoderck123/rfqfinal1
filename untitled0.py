@@ -16,7 +16,11 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 def get_embedding(text):
     text = text.replace("\n", " ").strip()
     try:
-        response = openai.embeddings.create(input=[text], model=EMBEDDING_MODEL)
+        response = openai.Embedding.create(
+    input=[text],
+    model=EMBEDDING_MODEL
+)
+
         return np.array(response.data[0].embedding, dtype=np.float32)
     except Exception as e:
         print(f"Embedding error: {e}")
