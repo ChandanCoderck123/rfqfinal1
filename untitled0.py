@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+# Uninstall newer OpenAI and install version 0.28.0 to ensure old Embedding calls still work
+!pip uninstall -y openai
+!pip install openai==0.28.0
+!pip install faiss-cpu numpy pandas flask
+
 import openai
 import faiss
 import numpy as np
@@ -27,17 +31,13 @@ def get_embedding(text):
         return None
 
 def clean_text(text):
-    # Remove non-ASCII characters and strip whitespace
     return re.sub(r'[^\x00-\x7F]+', '', text).strip()
 
-# Load your CSV file here. Adjust path to point to your CSV on EC2.
-csv_path = "SKU_list_of_23-24_Sheet1.csv"  # <-- Update this if needed
+# Load your CSV file (ensure it's in your Colab /content/ directory)
+csv_path = "/content/SKU list of 23-24 - Sheet1.csv"
 catalog_df = pd.read_csv(csv_path)
-
-# Ensure columns exist. Adjust if your CSV differs.
 catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
 
-# Combine brand + description to form a single text for embedding
 product_texts = catalog_df.apply(
     lambda x: f"{x['Brand']} {x['Description']}", axis=1
 )
@@ -55,12 +55,10 @@ for idx, text in enumerate(product_texts):
 if not embeddings_list:
     raise ValueError("No embeddings generated. Check your API key or data format.")
 
-# Build Faiss index
 embeddings_array = np.vstack(embeddings_list)
 faiss_index = faiss.IndexFlatL2(embeddings_array.shape[1])
 faiss_index.add(embeddings_array)
 
-# Map each index back to the catalog entry
 catalog_map = {
     i: catalog_df.iloc[valid_indices[i]].to_dict() for i in range(len(valid_indices))
 }
@@ -82,7 +80,6 @@ def rfq_search():
         query_embedding = get_embedding(query)
         if query_embedding is None:
             continue
-        # Search top 5 closest embeddings
         _, indices = faiss_index.search(query_embedding.reshape(1, -1), 5)
         top_matches = []
         best_match = None
@@ -108,6 +105,5 @@ def rfq_search():
 
     return jsonify(matched_products), 200
 
-if __name__ == "__main__":
-    # Run on port 5000; host='0.0.0.0' so it's accessible externally
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# To run in Google Colab, uncomment the following line.
+# app.run(host='0.0.0.0', port=5000, debug=True)
