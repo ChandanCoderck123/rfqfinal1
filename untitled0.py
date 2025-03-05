@@ -6,7 +6,7 @@ import re
 import json
 from flask import Flask, request, jsonify
 
-# Set your Groq API key
+# Set your Groq API key and endpoint
 GROQ_API_KEY = "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"
 GROQ_API_URL = "https://api.groq.com/v1/embeddings"
 
@@ -18,11 +18,15 @@ def get_embedding(text):
     try:
         response = requests.post(
             GROQ_API_URL,
-            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
             json={"input": text, "model": EMBEDDING_MODEL}
         )
-        response.raise_for_status()
+        response.raise_for_status()  # Raises an error for HTTP issues
         data = response.json()
+        # Convert the embedding to a NumPy array of type float32
         return np.array(data['data'][0]['embedding'], dtype=np.float32)
     except Exception as e:
         print(f"Embedding error: {e}")
