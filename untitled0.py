@@ -34,7 +34,7 @@ def clean_text(text):
     return re.sub(r'[^\x00-\x7F]+', '', text).strip()
 
 # Load your CSV file (ensure it's in your Colab /content/ directory)
-csv_path = "/content/SKU list of 23-24 - Sheet1.csv"
+csv_path = "./SKU list of 23-24 - Sheet1.csv"
 catalog_df = pd.read_csv(csv_path)
 catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
 
