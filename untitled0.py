@@ -14,51 +14,51 @@ openai.api_key = "sk-proj-CyllS6cMdbxv8NYbA2zOhOZfkuOcv7_LIM-ofiKRCEesj1PGaxL1JC
 # Set the embedding model
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
-def get_embedding(text):
-    text = text.replace("\n", " ").strip()
-    try:
-        # Use openai.Embedding.create from openai==0.28.0
-        response = openai.Embedding.create(
-            input=[text],
-            model=EMBEDDING_MODEL
-        )
-        return np.array(response['data'][0]['embedding'], dtype=np.float32)
-    except Exception as e:
-        print(f"Embedding error: {e}")
-        return None
+# def get_embedding(text):
+#     text = text.replace("\n", " ").strip()
+#     try:
+#         # Use openai.Embedding.create from openai==0.28.0
+#         response = openai.Embedding.create(
+#             input=[text],
+#             model=EMBEDDING_MODEL
+#         )
+#         return np.array(response['data'][0]['embedding'], dtype=np.float32)
+#     except Exception as e:
+#         print(f"Embedding error: {e}")
+#         return None
 
-def clean_text(text):
-    return re.sub(r'[^\x00-\x7F]+', '', text).strip()
+# def clean_text(text):
+#     return re.sub(r'[^\x00-\x7F]+', '', text).strip()
 
-# Load your CSV file (ensure it's in your Colab /content/ directory)
-csv_path = "./SKU list of 23-24 - Sheet1.csv"
-catalog_df = pd.read_csv(csv_path)
-catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
+# # Load your CSV file (ensure it's in your Colab /content/ directory)
+# csv_path = "./SKU list of 23-24 - Sheet1.csv"
+# catalog_df = pd.read_csv(csv_path)
+# catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
 
-product_texts = catalog_df.apply(
-    lambda x: f"{x['Brand']} {x['Description']}", axis=1
-)
-product_texts = product_texts.apply(clean_text)
+# product_texts = catalog_df.apply(
+#     lambda x: f"{x['Brand']} {x['Description']}", axis=1
+# )
+# product_texts = product_texts.apply(clean_text)
 
-embeddings_list = []
-valid_indices = []
+# embeddings_list = []
+# valid_indices = []
 
-for idx, text in enumerate(product_texts):
-    emb = get_embedding(text)
-    if emb is not None:
-        embeddings_list.append(emb)
-        valid_indices.append(idx)
+# for idx, text in enumerate(product_texts):
+#     emb = get_embedding(text)
+#     if emb is not None:
+#         embeddings_list.append(emb)
+#         valid_indices.append(idx)
 
-if not embeddings_list:
-    raise ValueError("No embeddings generated. Check your API key or data format.")
+# if not embeddings_list:
+#     raise ValueError("No embeddings generated. Check your API key or data format.")
 
-embeddings_array = np.vstack(embeddings_list)
-faiss_index = faiss.IndexFlatL2(embeddings_array.shape[1])
-faiss_index.add(embeddings_array)
+# embeddings_array = np.vstack(embeddings_list)
+# faiss_index = faiss.IndexFlatL2(embeddings_array.shape[1])
+# faiss_index.add(embeddings_array)
 
-catalog_map = {
-    i: catalog_df.iloc[valid_indices[i]].to_dict() for i in range(len(valid_indices))
-}
+# catalog_map = {
+#     i: catalog_df.iloc[valid_indices[i]].to_dict() for i in range(len(valid_indices))
+# }
 
 app = Flask(__name__)
 
