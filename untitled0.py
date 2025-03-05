@@ -1,4 +1,3 @@
-
 import openai
 import faiss
 import numpy as np
@@ -7,16 +6,17 @@ import re
 import json
 from flask import Flask, request, jsonify
 
-# Set your OpenAI API key
-openai.api_key = "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"
+# Set your Groq API key
+openai.api_key = "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"
+openai.api_base = "https://api.groq.com/v1"  # Ensure requests go to Groq's API
 
-# Set the embedding model
+# Set the embedding model (Groq-compatible with OpenAI models)
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
 def get_embedding(text):
     text = text.replace("\n", " ").strip()
     try:
-        # Use openai.Embedding.create from openai==0.28.0
+        # Call Groq API using OpenAI-compatible request format
         response = openai.Embedding.create(
             input=[text],
             model=EMBEDDING_MODEL
@@ -29,7 +29,7 @@ def get_embedding(text):
 def clean_text(text):
     return re.sub(r'[^\x00-\x7F]+', '', text).strip()
 
-# Load your CSV file (ensure it's in your Colab /content/ directory)
+# Load your CSV file (ensure it's in the same directory)
 csv_path = "./SKU list of 23-24 - Sheet1.csv"
 catalog_df = pd.read_csv(csv_path)
 catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
