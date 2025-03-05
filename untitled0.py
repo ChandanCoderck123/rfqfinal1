@@ -1,4 +1,4 @@
-import openai
+import requests
 import faiss
 import numpy as np
 import pandas as pd
@@ -7,8 +7,8 @@ import json
 from flask import Flask, request, jsonify
 
 # Set your Groq API key
-openai.api_key = "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"
-openai.api_base = "https://api.groq.com/v1"  # Ensure requests go to Groq's API
+GROQ_API_KEY = "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"
+GROQ_API_URL = "https://api.groq.com/v1/embeddings"
 
 # Set the embedding model (Groq-compatible with OpenAI models)
 EMBEDDING_MODEL = "text-embedding-ada-002"
@@ -16,12 +16,14 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 def get_embedding(text):
     text = text.replace("\n", " ").strip()
     try:
-        # Call Groq API using OpenAI-compatible request format
-        response = openai.Embedding.create(
-            input=[text],
-            model=EMBEDDING_MODEL
+        response = requests.post(
+            GROQ_API_URL,
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+            json={"input": text, "model": EMBEDDING_MODEL}
         )
-        return np.array(response['data'][0]['embedding'], dtype=np.float32)
+        response.raise_for_status()
+        data = response.json()
+        return np.array(data['data'][0]['embedding'], dtype=np.float32)
     except Exception as e:
         print(f"Embedding error: {e}")
         return None
@@ -30,13 +32,11 @@ def clean_text(text):
     return re.sub(r'[^\x00-\x7F]+', '', text).strip()
 
 # Load your CSV file (ensure it's in the same directory)
-csv_path = "./SKU list of 23-24 - Sheet1.csv"
+csv_path = "./SKU_list_of_23-24.csv"  # Update path as needed
 catalog_df = pd.read_csv(csv_path)
 catalog_df = catalog_df[['SKU', 'Brand', 'Description']].fillna("")
 
-product_texts = catalog_df.apply(
-    lambda x: f"{x['Brand']} {x['Description']}", axis=1
-)
+product_texts = catalog_df.apply(lambda x: f"{x['Brand']} {x['Description']}", axis=1)
 product_texts = product_texts.apply(clean_text)
 
 embeddings_list = []
@@ -55,9 +55,7 @@ embeddings_array = np.vstack(embeddings_list)
 faiss_index = faiss.IndexFlatL2(embeddings_array.shape[1])
 faiss_index.add(embeddings_array)
 
-catalog_map = {
-    i: catalog_df.iloc[valid_indices[i]].to_dict() for i in range(len(valid_indices))
-}
+catalog_map = {i: catalog_df.iloc[valid_indices[i]].to_dict() for i in range(len(valid_indices))}
 
 app = Flask(__name__)
 
@@ -101,5 +99,5 @@ def rfq_search():
 
     return jsonify(matched_products), 200
 
-# To run in Google Colab, uncomment the following line.
-# app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)
