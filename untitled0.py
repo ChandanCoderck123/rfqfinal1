@@ -12,8 +12,7 @@ import json
 from flask import Flask, request, jsonify
 
 # Set your OpenAI API key
-openai.api_key = "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"
-
+openai.api_key = "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"
 # Set the embedding model
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
